@@ -1263,8 +1263,16 @@ function initCore() {
 	}
 
 	$( document ).ajaxError(function( event, request, settings ) {
+		if (request.errorProcessed) {
+			return;
+		}
+
 		if (_.contains([302, 307, 401], request.status)) {
-			var app = $('#content').attr('class').substring(4);
+			var appClass = $('#content').attr('class');
+			var app = 'files';
+			if (appClass) {
+				app = appClass.substring(4);
+			}
 			OC.redirect(OC.generateUrl('apps/' + app));
 		}
 	});
