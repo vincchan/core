@@ -849,7 +849,7 @@ describe('Core base tests', function() {
 		beforeEach(function() {
 			reloadStub = sinon.stub(OC, 'reload');
 			// unstub the error processing method
-			ajaxErrorStub = OC.processAjaxError;
+			ajaxErrorStub = OC._processAjaxError;
 			ajaxErrorStub.restore();
 			window.initCore();
 		});
@@ -877,7 +877,6 @@ describe('Core base tests', function() {
 
 				if (expectedCall) {
 					expect(reloadStub.calledOnce).toEqual(true);
-					expect(reloadStub.getCall(0).args[0]).toEqual(OC.webroot + '/index.php/apps/files');
 				} else {
 					expect(reloadStub.notCalled).toEqual(true);
 				}

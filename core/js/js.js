@@ -699,10 +699,45 @@ var OC={
 	 * Process ajax error, redirects to main page
 	 * if an error/auth error status was returned.
 	 */
-	processAjaxError: function(xhr) {
+	_processAjaxError: function(xhr) {
 		if (_.contains([302, 307, 401], xhr.status)) {
 			OC.reload();
 		}
+	},
+
+	/**
+	 * Registers XmlHttpRequest object for global error processing.
+	 *
+	 * This means that if this XHR object returns 401 or session timeout errors,
+	 * the current page will automatically be reloaded.
+	 *
+	 * @param {XMLHttpRequest} xhr
+	 */
+	registerXHRForErrorProcessing: function(xhr) {
+		var loadCallback = function() {
+			if (xhr.readyState !== 4) {
+				return;
+			}
+
+			if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
+				return;
+			}
+
+			// fire jquery global ajax error handler
+			$(document).trigger(new $.Event('ajaxError'), xhr);
+		};
+
+		var errorCallback = function() {
+			// fire jquery global ajax error handler
+			$(document).trigger(new $.Event('ajaxError'), xhr);
+		};
+
+		// FIXME: also needs an IE8 way
+		if (xhr.addEventListener) {
+			xhr.addEventListener('load', loadCallback);
+			xhr.addEventListener('error', errorCallback);
+		}
+
 	}
 };
 
@@ -1280,10 +1315,11 @@ function initCore() {
 	}
 
 	$(document).on('ajaxError.main', function( event, request, settings ) {
+		console.error('ajax error', request.status);
 		if (settings && settings.allowAuthErrors) {
 			return;
 		}
-		OC.processAjaxError(request);
+		OC._processAjaxError(request);
 	});
 
 	/**
