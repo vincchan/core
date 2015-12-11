@@ -137,6 +137,22 @@
 				});
 				return result;
 			};
+			xhr.addEventListener('load', function() {
+				if (xhr.readyState !== 4) {
+					return;
+				}
+
+				if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 304) {
+					return;
+				}
+
+				// fire jquery global ajax error handler
+				$(document).trigger(new $.Event('ajaxError'), xhr);
+			});
+			xhr.addEventListener('error', function() {
+				// fire jquery global ajax error handler
+				$(document).trigger(new $.Event('ajaxError'), xhr);
+			});
 			return xhr;
 		},
 
