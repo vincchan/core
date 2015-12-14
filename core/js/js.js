@@ -700,7 +700,12 @@ var OC={
 	 * if an error/auth error status was returned.
 	 */
 	_processAjaxError: function(xhr) {
-		if (_.contains([302, 307, 401], xhr.status)) {
+		// purposefully aborted request ?
+		if (xhr.status === 0 && (xhr.statusText === 'abort' || xhr.statusText === 'timeout')) {
+			return;
+		}
+
+		if (_.contains([0, 302, 307, 401], xhr.status)) {
 			OC.reload();
 		}
 	},
