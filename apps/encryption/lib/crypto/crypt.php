@@ -441,7 +441,7 @@ class Crypt {
 
 		$catFile = $this->splitMetaData($keyFileContents, $cipher);
 
-		if ($catFile['signature']) {
+		if ($catFile['signature'] !== false) {
 			$this->checkSignature($catFile['encrypted'], $passPhrase, $catFile['signature']);
 		}
 
