@@ -109,7 +109,8 @@ class Encryption extends Wrapper {
 			'size',
 			'unencryptedSize',
 			'encryptionStorage',
-			'headerSize'
+			'headerSize',
+			'signed'
 		);
 	}
 
@@ -131,6 +132,7 @@ class Encryption extends Wrapper {
 	 * @param int $size
 	 * @param int $unencryptedSize
 	 * @param int $headerSize
+	 * @param bool $signed
 	 * @param string $wrapper stream wrapper class
 	 * @return resource
 	 *
@@ -147,6 +149,7 @@ class Encryption extends Wrapper {
 								$size,
 								$unencryptedSize,
 								$headerSize,
+								$signed,
 								$wrapper =  'OC\Files\Stream\Encryption') {
 
 		$context = stream_context_create(array(
@@ -163,7 +166,8 @@ class Encryption extends Wrapper {
 				'size' => $size,
 				'unencryptedSize' => $unencryptedSize,
 				'encryptionStorage' => $encStorage,
-				'headerSize' => $headerSize
+				'headerSize' => $headerSize,
+				'signed' => $signed
 			)
 		));
 
@@ -224,7 +228,7 @@ class Encryption extends Wrapper {
 		$this->position = 0;
 		$this->cache = '';
 		$this->writeFlag = false;
-		$this->unencryptedBlockSize = $this->encryptionModule->getUnencryptedBlockSize();
+		$this->unencryptedBlockSize = $this->encryptionModule->getUnencryptedBlockSize($this->signed);
 
 		if (
 			$mode === 'w'
