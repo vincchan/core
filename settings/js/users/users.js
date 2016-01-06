@@ -396,6 +396,7 @@ var UserList = {
 		}
 		UserList.currentGid = gid;
 		var pattern = this.filter;
+		var oldScrollVerticalPosition = UserList.scrollArea.scrollTop();
 		$.get(
 			OC.generateUrl('/settings/users/users'),
 			{ offset: UserList.offset, limit: limit, gid: gid, pattern: pattern },
@@ -424,6 +425,11 @@ var UserList = {
 					$userList.siblings('.loading').remove();
 				}
 				UserList.offset += limit;
+				if(oldScrollVerticalPosition !== 0 && UserList.scrollArea.scrollTop() < oldScrollVerticalPosition) {
+					// hack against chrome jumping to top
+					var delta = loadedUsers * $('#userlist tr:first').height();
+					UserList.scrollArea.scrollTop(oldScrollVerticalPosition + delta);
+				}
 			}).always(function() {
 				UserList.updating = false;
 			});
