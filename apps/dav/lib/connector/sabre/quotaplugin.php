@@ -100,7 +100,7 @@ class QuotaPlugin extends \Sabre\DAV\ServerPlugin {
 				// there is still enough space for the remaining chunks
 				$length -= $chunkHandler->getCurrentSize();
 			}
-			$freeSpace = $this->getFreeSpace($parentUri);
+			$freeSpace = $this->getFreeSpace($uri);
 			if ($freeSpace !== \OCP\Files\FileInfo::SPACE_UNKNOWN && $length > $freeSpace) {
 				if (isset($chunkHandler)) {
 					$chunkHandler->cleanup();
