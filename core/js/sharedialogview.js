@@ -199,6 +199,7 @@
 							$('.shareWithField').autocomplete("option", "autoFocus", true);
 							response(suggestions);
 						} else {
+							OC.Notification.showTemporary(t('core', 'No users or groups found for ' + $('.shareWithField').val()));
 							response();
 						}
 					} else {
