@@ -215,6 +215,30 @@ class File extends Node implements IFile {
 				}
 			}
 			$this->refreshInfo();
+
+			// Clear all checksums on upload
+			$this->info->clearChecksums();
+
+			if (isset($request->server['HTTP_OC_CHECKSUM'])) {
+				$checksums = explode(',', $request->server['HTTP_OC_CHECKSUM']);
+
+				foreach($checksums as $checksum) {
+					list($type, $sum) = explode(':', $checksum, 2);
+
+					try {
+						$pass = $this->info->addChecksum($type, $sum);
+					} catch (\OCP\Files\Checksum\UnsupportedChecksumTypeException $e) {
+						//ignore for now
+						continue;
+					}
+
+					// Checksum verification failed
+					if (!$pass) {
+						//ABORT!
+						//TODO: Implement
+					}
+				}
+			}
 		} catch (StorageNotAvailableException $e) {
 			throw new ServiceUnavailable("Failed to check file size: " . $e->getMessage());
 		}
@@ -527,5 +551,12 @@ class File extends Node implements IFile {
 		}
 
 		throw new \Sabre\DAV\Exception($e->getMessage(), 0, $e);
+	}
+
+	/**
+	 * @return \string[] mapping type => checksum
+	 */
+	public function getChecksums() {
+		return $this->info->getChecksums();
 	}
 }
