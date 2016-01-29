@@ -351,4 +351,16 @@ class Node implements \OCP\Files\Node {
 	public function getOwner() {
 		return $this->getFileInfo()->getOwner();
 	}
+
+	public function addChecksum($type, $checksum) {
+		return;
+	}
+
+	public function getChecksums() {
+		return;
+	}
+
+	public function clearChecksums() {
+		return;
+	}
 }

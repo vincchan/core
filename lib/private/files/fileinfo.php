@@ -68,6 +68,9 @@ class FileInfo implements \OCP\Files\FileInfo, \ArrayAccess {
 	 */
 	private $childEtags = [];
 
+	/** @var \OCP\Files\Checksum\IManager */
+	private $checksumManager;
+
 	/**
 	 * @param string|boolean $path
 	 * @param Storage\Storage $storage
@@ -75,14 +78,16 @@ class FileInfo implements \OCP\Files\FileInfo, \ArrayAccess {
 	 * @param array|ICacheEntry $data
 	 * @param \OCP\Files\Mount\IMountPoint $mount
 	 * @param \OCP\IUser|null $owner
+	 * @param \OCP\Files\Checksum\IManager|null $checksumManager
 	 */
-	public function __construct($path, $storage, $internalPath, $data, $mount, $owner= null) {
+	public function __construct($path, $storage, $internalPath, $data, $mount, $owner= null, $checksumManager = null) {
 		$this->path = $path;
 		$this->storage = $storage;
 		$this->internalPath = $internalPath;
 		$this->data = $data;
 		$this->mount = $mount;
 		$this->owner = $owner;
+		$this->checksumManager = $checksumManager;
 	}
 
 	public function offsetSet($offset, $value) {
@@ -325,6 +330,41 @@ class FileInfo implements \OCP\Files\FileInfo, \ArrayAccess {
 			// attach the permissions to propagate etag on permision changes of submounts
 			$permissions = isset($data['permissions']) ? $data['permissions'] : 0;
 			$this->childEtags[] = $relativeEntryPath . '/' . $data['etag'] . $permissions;
+		}
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function addChecksum($type, $checksum) {
+		$node = \OC::$server->getRootFolder()->get($this->getPath());
+
+		if ($node instanceof \OCP\Files\File) {
+			return $this->checksumManager->addChecksum($node, $type, $checksum);
+		}
+
+		return false;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getChecksums() {
+		$node = \OC::$server->getRootFolder()->get($this->getPath());
+
+		if ($node instanceof \OCP\Files\File) {
+			return $this->checksumManager->getChecksums($node);
+		}
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function clearChecksums() {
+		$node = \OC::$server->getRootFolder()->get($this->getPath());
+
+		if ($node instanceof \OCP\Files\File) {
+			$this->checksumManager->clearChecksums($node);
 		}
 	}
 }

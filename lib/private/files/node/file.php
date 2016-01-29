@@ -164,4 +164,25 @@ class File extends Node implements \OCP\Files\File {
 	public function hash($type, $raw = false) {
 		return $this->view->hash($type, $this->path, $raw);
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function addChecksum($type, $checksum) {
+		return $this->fileInfo->addChecksum($type, $checksum);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getChecksums() {
+		return $this->fileInfo->getChecksums();
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function clearChecksums() {
+		$this->$this->fileInfo->clearChecksums();
+	}
 }

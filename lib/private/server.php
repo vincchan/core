@@ -617,6 +617,9 @@ class Server extends ServerContainer implements IServerContainer {
 
 			return $manager;
 		});
+		$this->registerService('ChecksumManager', function(Server $c) {
+			return new \OC\Files\Checksum\Manager();
+		});
 	}
 
 	/**
@@ -1261,6 +1264,13 @@ class Server extends ServerContainer implements IServerContainer {
 	 */
 	public function getShareManager() {
 		return $this->query('ShareManager');
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getChecksumManager() {
+		return $this->query('ChecksumManager');
 	}
 
 }

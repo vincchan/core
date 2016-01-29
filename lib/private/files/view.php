@@ -88,6 +88,9 @@ class View {
 
 	private $userManager;
 
+	/** @var \OCP\Files\Checksum\IManager */
+	private $checksumManager;
+
 	/**
 	 * @param string $root
 	 * @throws \Exception If $root contains an invalid path
@@ -104,6 +107,7 @@ class View {
 		$this->lockingProvider = \OC::$server->getLockingProvider();
 		$this->lockingEnabled = !($this->lockingProvider instanceof \OC\Lock\NoopLockingProvider);
 		$this->userManager = \OC::$server->getUserManager();
+		$this->checksumManager = \OC::$server->getChecksumManager();
 	}
 
 	public function getAbsolutePath($path = '/') {
@@ -1284,7 +1288,7 @@ class View {
 			}
 
 			$owner = $this->getUserObjectForOwner($storage->getOwner($internalPath));
-			$info = new FileInfo($path, $storage, $internalPath, $data, $mount, $owner);
+			$info = new FileInfo($path, $storage, $internalPath, $data, $mount, $owner, $this->checksumManager);
 
 			if ($data and isset($data['fileid'])) {
 				if ($includeMountPoints and $data['mimetype'] === 'httpd/unix-directory') {
@@ -1351,7 +1355,7 @@ class View {
 					$content['permissions'] = $content['permissions'] & ~\OCP\Constants::PERMISSION_SHARE;
 				}
 				$owner = $this->getUserObjectForOwner($storage->getOwner($content['path']));
-				return new FileInfo($path . '/' . $content['name'], $storage, $content['path'], $content, $mount, $owner);
+				return new FileInfo($path . '/' . $content['name'], $storage, $content['path'], $content, $mount, $owner, $this->checksumManager);
 			}, $contents);
 
 			//add a folder for any mountpoint in this directory and add the sizes of other mountpoints to the folders
@@ -1422,7 +1426,7 @@ class View {
 							}
 
 							$owner = $this->getUserObjectForOwner($subStorage->getOwner(''));
-							$files[] = new FileInfo($path . '/' . $rootEntry['name'], $subStorage, '', $rootEntry, $mount, $owner);
+							$files[] = new FileInfo($path . '/' . $rootEntry['name'], $subStorage, '', $rootEntry, $mount, $owner, $this->checksumManager);
 						}
 					}
 				}
@@ -1541,7 +1545,7 @@ class View {
 					$path = $mountPoint . $result['path'];
 					$result['path'] = substr($mountPoint . $result['path'], $rootLength);
 					$owner = \OC::$server->getUserManager()->get($storage->getOwner($internalPath));
-					$files[] = new FileInfo($path, $storage, $internalPath, $result, $mount, $owner);
+					$files[] = new FileInfo($path, $storage, $internalPath, $result, $mount, $owner, $this->checksumManager);
 				}
 			}
 
@@ -1560,7 +1564,7 @@ class View {
 							$result['path'] = rtrim($relativeMountPoint . $result['path'], '/');
 							$path = rtrim($mountPoint . $internalPath, '/');
 							$owner = \OC::$server->getUserManager()->get($storage->getOwner($internalPath));
-							$files[] = new FileInfo($path, $storage, $internalPath, $result, $mount, $owner);
+							$files[] = new FileInfo($path, $storage, $internalPath, $result, $mount, $owner, $this->checksumManager);
 						}
 					}
 				}
@@ -1722,7 +1726,8 @@ class View {
 				'permissions' => \OCP\Constants::PERMISSION_ALL
 			],
 			$mount,
-			$owner
+			$owner,
+			$this->checksumManager
 		);
 	}
 

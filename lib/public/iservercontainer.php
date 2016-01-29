@@ -512,4 +512,12 @@ interface IServerContainer {
 	 * @since 9.0.0
 	 */
 	public function getShareManager();
+
+	/**
+	 * Return the checksum manager
+	 *
+	 * @return \OCP\Files\Checksum\IManager
+	 * @since 9.0.0
+	 */
+	public function getChecksumManager();
 }
