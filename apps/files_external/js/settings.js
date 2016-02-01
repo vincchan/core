@@ -954,17 +954,23 @@ MountConfigListView.prototype = _.extend({
 	 * @return {jQuery} newly created input
 	 */
 	writeParameterInput: function($td, parameter, placeholder, classes) {
+		var FLAG_OPTIONAL = 1;
+		var FLAG_USER_PROVIDED = 2;
+		var VALUE_TEXT = 0;
+		var VALUE_BOOLEAN = 1;
+		var VALUE_PASSWORD = 2;
+		var VALUE_HIDDEN = 3;
+
 		var hasFlag = function(flag) {
-			return placeholder.indexOf(flag) !== -1;
+			return (placeholder.flags & flag) === flag;
 		};
 		classes = $.isArray(classes) ? classes : [];
 		classes.push('added');
-		if (placeholder.indexOf('&') === 0) {
+		if (hasFlag(FLAG_OPTIONAL)) {
 			classes.push('optional');
-			placeholder = placeholder.substring(1);
 		}
 
-		if (hasFlag('@')) {
+		if (hasFlag(FLAG_USER_PROVIDED)) {
 			if (this._isPersonal) {
 				classes.push('user_provided');
 			} else {
@@ -974,19 +980,15 @@ MountConfigListView.prototype = _.extend({
 
 		var newElement;
 
-		var trimmedPlaceholder = placeholder;
-		var flags = ['@', '*', '!', '#', '&']; // used to determine what kind of parameter
-		while(flags.indexOf(trimmedPlaceholder[0]) !== -1) {
-			trimmedPlaceholder = trimmedPlaceholder.substr(1);
-		}
-		if (hasFlag('*')) {
+		var trimmedPlaceholder = placeholder.value;
+		if (placeholder.type === VALUE_PASSWORD) {
 			newElement = $('<input type="password" class="'+classes.join(' ')+'" data-parameter="'+parameter+'" placeholder="'+ trimmedPlaceholder+'" />');
-		} else if (hasFlag('!')) {
+		} else if (placeholder.type === VALUE_BOOLEAN) {
 			var checkboxId = _.uniqueId('checkbox_');
 			newElement = $('<input type="checkbox" id="'+checkboxId+'" class="'+classes.join(' ')+'" data-parameter="'+parameter+'" /><label for="'+checkboxId+'">'+ trimmedPlaceholder+'</label>');
-		} else if (hasFlag('#')) {
+		} else if (placeholder.type === VALUE_HIDDEN) {
 			newElement = $('<input type="hidden" class="'+classes.join(' ')+'" data-parameter="'+parameter+'" />');
-		} else {
+		} else if (placeholder.type === VALUE_TEXT) {
 			newElement = $('<input type="text" class="'+classes.join(' ')+'" data-parameter="'+parameter+'" placeholder="'+ trimmedPlaceholder+'" />');
 		}
 		highlightInput(newElement);
